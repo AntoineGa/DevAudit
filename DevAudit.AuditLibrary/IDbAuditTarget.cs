@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.Xml.XPath;
 namespace DevAudit.AuditLibrary
 {
-    class AnalyzerVulnerability
+    public interface IDbAuditTarget
     {
+        XPathNodeIterator ExecuteDbQueryToXml(object[] args);
     }
 }

@@ -64,6 +64,7 @@ namespace DevAudit.AuditLibrary
         public Dictionary<string, string> OptionalDirectoryLocations { get; } = new Dictionary<string, string>();
 
         public Dictionary<string, object> ServerOptions { get; set; } = new Dictionary<string, object>();
+        
         #endregion
 
         #region Methods

@@ -236,6 +236,7 @@ namespace DevAudit.AuditLibrary
                     this.AuditEnvironment.Warning("The profile file {0} does not exist. No audit profile will be used.", pf.FullName);
                 }
             }
+            this.AlpheusEnvironment = new AlEnvironment(this);
         }
 
         private void AuditTarget_HostEnvironmentMessageHandler(object sender, EnvironmentEventArgs e)
@@ -262,6 +263,37 @@ namespace DevAudit.AuditLibrary
         protected event EventHandler<EnvironmentEventArgs> AuditEnvironmentMessage;
         protected event EventHandler<EnvironmentEventArgs> ControllerMessage;
         #endregion
+        
+        #region Methods
+        public string GetEnvironmentVar(string name)
+        {
+            AuditEnvironment.ProcessExecuteStatus status = AuditEnvironment.ProcessExecuteStatus.Unknown;
+            string process_output = "", process_error = "", var = "", cmd = "", args = "";
+            if (this.AuditEnvironment.IsWindows)
+            {
+                var = "%" + name + "%";
+                cmd = "powershell";
+                args = "(Get-Childitem env:" + name + ").Value";
+            }
+            else
+            {
+                var = "$" + name;
+                cmd = "echo";
+                args = var;
+            }
+            bool r = this.AuditEnvironment.Execute(cmd, args, out status, out process_output, out process_error);
+            if (r && !string.IsNullOrEmpty(process_output))
+            {
+                this.AuditEnvironment.Debug("Get environment variable {0} returned {1}.", name, process_output);
+                return process_output;
+            }
+            else
+            {
+                this.AuditEnvironment.Error("Could not execute command echo {0}: {1} {2}", var, process_error, process_output);
+                return string.Empty;
+            }
+        }
+        #endregion
 
         #region Properties
         public string DevAuditDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
@@ -270,6 +302,7 @@ namespace DevAudit.AuditLibrary
         public bool IsDockerized { get; protected set; }
         public LocalEnvironment HostEnvironment { get; protected set; }
         public AuditEnvironment AuditEnvironment { get; protected set; }
+        public AlEnvironment AlpheusEnvironment { get; protected set; }
         public bool HostEnvironmentInitialised { get; private set; } = false;
         public bool AuditEnvironmentIntialised { get; private set; } = false;
         public bool UseAsyncMethods { get; private set; } = false;                

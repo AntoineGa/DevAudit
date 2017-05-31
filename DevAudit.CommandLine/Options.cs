@@ -27,6 +27,9 @@ namespace DevAudit.CommandLine
         [VerbOption("bower", HelpText = "Audit Bower packages. Use the --file option to specify a particular bower.json file otherwise the one in the current directory will be used.")]
         public Options AuditBower { get; set; }
 
+        [VerbOption("yarn", HelpText = "Audit Yarn packages. Use the --file option to specify a particular package.json file otherwise the one in the current directory will be used.")]
+        public Options AuditYarn { get; set; }
+
         [VerbOption("oneget", HelpText = "Audit OneGet packages on Windows. Packages are scanned from the system OneGet repository.")]
         public Options AuditOneGet { get; set; }
 
@@ -202,7 +205,7 @@ namespace DevAudit.CommandLine
         public static Dictionary<string, object> Parse(string o)
         {
             Dictionary<string, object> audit_options = new Dictionary<string, object>();
-            Regex re = new Regex(@"(\w+)\=([A-Za-z0-9_\-\\\/\.\:\+@]+)", RegexOptions.Compiled);
+            Regex re = new Regex(@"(\w+)\=([^\,]+)", RegexOptions.Compiled);
             string [] pairs = o.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string s in pairs)
             {

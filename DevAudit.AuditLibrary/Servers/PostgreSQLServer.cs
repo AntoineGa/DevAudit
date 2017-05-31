@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.XPath;
 using System.Xml.Linq;
 
 using Versatile;
@@ -12,7 +13,7 @@ using Alpheus.IO;
 
 namespace DevAudit.AuditLibrary
 {
-    public class PostgreSQLServer : ApplicationServer
+    public class PostgreSQLServer : ApplicationServer, IDbAuditTarget
     {
         #region Constructors
         public PostgreSQLServer(Dictionary<string, object> server_options, EventHandler<EnvironmentEventArgs> message_handler) : base(server_options, 
@@ -79,7 +80,7 @@ namespace DevAudit.AuditLibrary
 
         protected override IConfiguration GetConfiguration()
         {
-            PostgreSQL pgsql = new PostgreSQL(this.ConfigurationFile);
+            PostgreSQL pgsql = new PostgreSQL(this.ConfigurationFile, this.AlpheusEnvironment);
             if (pgsql.ParseSucceded)
             {
                 this.Configuration = pgsql;
@@ -120,8 +121,14 @@ namespace DevAudit.AuditLibrary
         
         public override IEnumerable<OSSIndexQueryObject> GetPackages(params string[] o)
         {
-            if (!this.ModulesInitialised) throw new InvalidOperationException("Modules must be initialised before GetPackages is called.");
-            return this.GetModules()["postgres"];
+            if (!this.ModulesInitialised)
+            {
+                throw new InvalidOperationException("Modules must be initialised before GetPackages is called.");
+            }
+            else
+            {
+                return this.GetModules()["postgres"];
+            }
         }
 
         public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerability_version, string package_version)
@@ -133,6 +140,11 @@ namespace DevAudit.AuditLibrary
                 throw new Exception(message);
             }
             else return r;
+        }
+
+        public XPathNodeIterator ExecuteDbQueryToXml(object[] args)
+        {
+            throw new NotImplementedException();
         }
         #endregion
     }
